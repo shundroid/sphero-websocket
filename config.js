@@ -2,7 +2,6 @@ module.exports = {
     wsPort: 8080,
     allowedOrigin: "*",
     sphero: [
-        {name: "Miku", port: "/dev/rfcomm0"},
-        {name: "Rin", port: "/dev/rfcomm1"}
+        {name: "Rin", port: "COM3"}
     ]
 };
