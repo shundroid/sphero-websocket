@@ -6,6 +6,7 @@
 var Client = require("./lib/directories/client");
 var HttpServer = require("./lib/httpServer");
 var WebSocketServer = require("./lib/wsServer");
+var PluginManager = require("./lib/pluginManager");
 var sphero = require("sphero");
 var spheroServer = require("./lib/spheroServer");
 var fs = require("fs");
@@ -21,6 +22,8 @@ module.exports = function(config, isTestMode) {
       orb.connect();
     spheroServer.addOrb(orb, elm.name);
   });
+
+  var pluginManager = new PluginManager();
 
   var httpServer = new HttpServer(config.wsPort);
   var client = new Client();
