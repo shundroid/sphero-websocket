@@ -36,51 +36,39 @@ module.exports = function(config, isTestMode) {
   var wsServer = new WebSocketServer(httpServer, config.allowedOrigin);
   wsServer.on("request", function(connection, key) {
     spheroServer.addClient(key, connection);
-    wsServer.on("message", function(message) {
-      console.log("client: " + key);
-      if (message.type === "utf8") {
-        try {
-          var data = JSON.parse(message.utf8Data);
-        } catch (e) {
-          console.error("invalid JSON format");
-          return;
-        }
-        var command = data.command;
-        var client = spheroServer.getClient(key);
-        var orb = spheroServer.getClientsOrb(key);
+  });
+  wsServer.addChannel("sphero", function(data, key) {
+    var command = data.command;
+    var client = spheroServer.getClient(key);
+    var orb = spheroServer.getClientsOrb(key);
 
-        if (!client || !Array.isArray(data.arguments)) {
-          return;
-        }
+    if (!client || !Array.isArray(data.arguments)) {
+      return;
+    }
 
-        if (command.substr(0, 1) === "_") {
-          // internal command
-          switch (command) {
-            case "_list":
-              spheroServer.sendList(key, data.ID);
-              break;
-            case "_use":
-              if (data.arguments.length === 1) {
-                spheroServer.setClientsOrb(key, data.arguments[0]);
-              }
-              break;
+    if (command.substr(0, 1) === "_") {
+      // internal command
+      switch (command) {
+        case "_list":
+          spheroServer.sendList(key, data.ID);
+          break;
+        case "_use":
+          if (data.arguments.length === 1) {
+            spheroServer.setClientsOrb(key, data.arguments[0]);
           }
-          console.log(command + "(" + data.arguments + ")");
-        } else if (command in orb) {
-          // Sphero"s command
-          if (!isTestMode) {
-            orb[command].apply(orb, data.arguments);
-          }
-          console.log(client.linkedOrb.name + "." + command + "(" + data.arguments.join(",") + ")");
-        } else {
-          // invalid command
-          console.error("invalid command: " + command);
-        }
+          break;
       }
-    });
-    connection.on("close", function(reasonCode, description) {
-      console.log((new Date()) + " Peer " + connection.remoteAddress + " disconnected.");
-    });
+      console.log(command + "(" + data.arguments + ")");
+    } else if (command in orb) {
+      // Sphero"s command
+      if (!isTestMode) {
+        orb[command].apply(orb, data.arguments);
+      }
+      console.log(client.linkedOrb.name + "." + command + "(" + data.arguments.join(",") + ")");
+    } else {
+      // invalid command
+      console.error("invalid command: " + command);
+    }
   });
 
   process.on("uncaughtException", function(err) {

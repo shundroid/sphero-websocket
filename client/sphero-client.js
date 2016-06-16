@@ -62,7 +62,8 @@ sphero.prototype.send = function(cmd, args, resCallback) {
     var data = {
         command: cmd,
         arguments: args,
-        ID: mesID
+        ID: mesID,
+        channel: "sphero"
     };
     this.ws.send(JSON.stringify(data));
 };
