@@ -3,15 +3,14 @@
  * https://github.com/Babibubebon
  */
 "use strict";
-var Client = require("./client");
-var HttpServer = require("./httpServer");
-var WebSocketServer = require("./wsServer");
+var Client = require("./lib/directories/client");
+var HttpServer = require("./lib/httpServer");
+var WebSocketServer = require("./lib/wsServer");
 var sphero = require("sphero");
-var spheroServer = require("./lib/spheroserver");
+var spheroServer = require("./lib/spheroServer");
 var fs = require("fs");
 
 module.exports = function(config, isTestMode) {
-
   if (isTestMode) {
     console.log("running test-mode");
   }
