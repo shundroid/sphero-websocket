@@ -35,7 +35,7 @@ module.exports = function(config, isTestMode) {
   var wsServer = new WebSocketServer(httpServer, config.allowedOrigin);
   var spheroConnectionList = wsServer.getConnection("sphero");
   spheroConnectionList.on("connection", function(connection, key) {
-    spheroServer.addClient(key, connection);
+    spheroServer.addClient(key);
     spheroConnectionList.on("message", function(data, mesId) {
       var command = data.command;
       var client = spheroServer.getClient(key);
