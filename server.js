@@ -34,10 +34,10 @@ module.exports = function(config, isTestMode) {
   httpServer.listen();
 
   var wsServer = new WebSocketServer(httpServer, config.allowedOrigin);
-  wsServer.on("request", function(connection, key) {
+  wsServer.on("connection-sphero", function(connection, key) {
     spheroServer.addClient(key, connection);
   });
-  wsServer.addChannel("sphero", function(data, key) {
+  wsServer.on("message-sphero", function(data, key) {
     var command = data.command;
     var client = spheroServer.getClient(key);
     var orb = spheroServer.getClientsOrb(key);

@@ -16,6 +16,7 @@ sphero.prototype.connect = function(uri, successCallback, errorCallback) {
     this.ws = new WebSocket(uri);
 
     this.ws.onopen = function() {
+        this.ws.send(JSON.stringify({ connectionName: "sphero"}));
         if (typeof successCallback === "function")
             successCallback(this.ws);
     }.bind(this);
@@ -62,8 +63,7 @@ sphero.prototype.send = function(cmd, args, resCallback) {
     var data = {
         command: cmd,
         arguments: args,
-        ID: mesID,
-        channel: "sphero"
+        ID: mesID
     };
     this.ws.send(JSON.stringify(data));
 };

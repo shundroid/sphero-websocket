@@ -27,11 +27,11 @@ var PluginClient = (function() {
   })();
 
   var WebSocketClient = (function() {
-    function WebSocketClient(uri, channelName) {
+    function WebSocketClient(uri, connectionName) {
       Dispathcer.call(this);
       this.ws = null;
       this.wsUri = null;
-      this.channel = channelName;
+      this.connectionName = connectionName;
     }
 
     WebSocketClient.prototype = Object.create(Dispatcher.prototype);
@@ -47,7 +47,7 @@ var PluginClient = (function() {
       this.ws.onopen = function() {
         if (typeof successCallback === "function") {
           successCallback(this.ws);
-          this.ws.send(this.channelName);
+          this.ws.send(this.connectionName);
         }
       }.bind(this);
 
