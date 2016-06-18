@@ -23,8 +23,6 @@ module.exports = function(config, isTestMode) {
     spheroServer.addOrb(orb, elm.name);
   });
 
-  var pluginManager = new PluginManager();
-
   var httpServer = new HttpServer(config.wsPort);
   var client = new Client();
   httpServer.addDirectory(client);
@@ -73,8 +71,10 @@ module.exports = function(config, isTestMode) {
   });
 
   process.on("uncaughtException", function(err) {
-      console.error(err);
+    console.error(err);
   });
 
+  var pluginManager = new PluginManager();
+  httpServer.addDirectory(pluginManager);
 };
 
