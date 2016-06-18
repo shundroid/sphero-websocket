@@ -1,17 +1,17 @@
 var PluginClient = (function() {
-  var Dispatcher = (function() {
-    function Dispatcher() {
+  var EventEmitter = (function() {
+    function EventEmitter() {
       this.listeners = {};
     }
 
-    Dispatcher.prototype.on = function(eventName, listener) {
+    EventEmitter.prototype.on = function(eventName, listener) {
       if (typeof this.listeners[eventName] === "undefined") {
         this.listeners[eventName] = [];
       }
       this.listeners[eventName].push(listener);
     };
 
-    Dispatcher.prototype._raise = function(eventName, args) {
+    EventEmitter.prototype.emit = function(eventName, args) {
       if (typeof this.listeners[eventName] !== "undefined") {
         this.listeners[eventName].forEach(listener => {
           if (typeof args === "undefined") {
@@ -23,7 +23,7 @@ var PluginClient = (function() {
       }
     };
 
-    return Dispatcher;
+    return EventEmitter;
   })();
 
   var WebSocketClient = (function() {
@@ -34,7 +34,7 @@ var PluginClient = (function() {
       this.connectionName = connectionName;
     }
 
-    WebSocketClient.prototype = Object.create(Dispatcher.prototype);
+    WebSocketClient.prototype = Object.create(EventEmitter.prototype);
     WebSocketClient.prototype.constructor = WebSocketClient;
 
     WebSocketClient.prototype.connect = function(uri, successCallback, errorCallback) {
@@ -62,7 +62,7 @@ var PluginClient = (function() {
           console.log(error);
           return;
         }
-        this._raise("message", data);
+        this.emit("message", data);
       }.bind(this);
 
     };
@@ -72,21 +72,21 @@ var PluginClient = (function() {
 
   // pluginName は channelName と等しい
   function PluginClient(pluginName, uri) {
-    Dispatcher.call(this);
+    EventEmitter.call(this);
     this.wsClient = new WebSocketClient(uri, "plugin-" + pluginName);
     this.wsClient.on("message", (data) => {
       if (typeof data.type === "undefined")
         return;
 
       if (data.type === "command") {
-        this._raise("command", [data.commandName, data.args]);
+        this.emit("command", [data.commandName, data.args]);
       } else (data.type === "custom") {
-        this._raise("message", data);
+        this.emit("message", data);
       }
     });
   }
 
-  PluginClient.prototype = Object.create(Dispatcher.prototype);
+  PluginClient.prototype = Object.create(EventEmitter.prototype);
   PluginClient.prototype.constructor = PluginClient;
 
   return PluginClient;
