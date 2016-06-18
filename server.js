@@ -70,7 +70,6 @@ module.exports = function(config, isTestMode) {
       }
     });
   });
-
   process.on("uncaughtException", function(err) {
     console.error(err);
   });
