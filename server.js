@@ -34,13 +34,14 @@ module.exports = function(config, isTestMode) {
   httpServer.listen();
 
   var wsServer = new WebSocketServer(httpServer, config.allowedOrigin);
-  wsServer.on("connection-sphero", function(connection, key) {
-    spheroServer.addClient(key, connection);
+  var spheroConnection = wsServer.getConnection("sphero");
+  spheroConnection.on("connection", function(connection) {
+    spheroServer.addClient(spheroConnection.key, connection);
   });
-  wsServer.on("message-sphero", function(data, key) {
+  spheroConnection.on("message", function(data) {
     var command = data.command;
-    var client = spheroServer.getClient(key);
-    var orb = spheroServer.getClientsOrb(key);
+    var client = spheroServer.getClient(spheroConnection.key);
+    var orb = spheroServer.getClientsOrb(spheroConnection.key);
 
     if (!client || !Array.isArray(data.arguments)) {
       return;
@@ -50,11 +51,11 @@ module.exports = function(config, isTestMode) {
       // internal command
       switch (command) {
         case "_list":
-          spheroServer.sendList(key, data.ID);
+          spheroServer.sendList(spheroConnection.key, data.ID);
           break;
         case "_use":
           if (data.arguments.length === 1) {
-            spheroServer.setClientsOrb(key, data.arguments[0]);
+            spheroServer.setClientsOrb(spheroConnection.key, data.arguments[0]);
           }
           break;
       }
