@@ -17,7 +17,6 @@ module.exports = function(config, isTestMode) {
   }
 
   config.sphero.forEach(function(elm) {
-    console.log("hoge");
     var orb = sphero(elm.port);
     if (!isTestMode)
       orb.connect();
