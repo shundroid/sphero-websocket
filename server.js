@@ -36,7 +36,7 @@ module.exports = function(config, isTestMode) {
   var spheroConnectionList = wsServer.getConnection("sphero");
   spheroConnectionList.on("connection", function(connection, key) {
     spheroServer.addClient(key, connection);
-    spheroConnectionList.on("message", function(data) {
+    spheroConnectionList.on("message", function(data, mesId) {
       var command = data.command;
       var client = spheroServer.getClient(key);
       var orb = spheroServer.getClientsOrb(key);
@@ -49,7 +49,7 @@ module.exports = function(config, isTestMode) {
         // internal command
         switch (command) {
           case "_list":
-            spheroConnectionList.send(key, { ID: data.mesID, content: spheroServer.getList() });
+            spheroConnectionList.send(key, mesId, spheroServer.getList());
             break;
           case "_use":
             if (data.arguments.length === 1) {
