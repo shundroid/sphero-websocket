@@ -49,7 +49,7 @@ module.exports = function(config, isTestMode) {
         // internal command
         switch (command) {
           case "_list":
-            spheroServer.sendList(key, data.ID);
+            spheroConnectionList.send(key, { ID: data.mesID, content: spheroServer.getList() });
             break;
           case "_use":
             if (data.arguments.length === 1) {
