@@ -17,6 +17,7 @@ module.exports = function(config, isTestMode) {
   }
 
   config.sphero.forEach(function(elm) {
+    console.log("hoge");
     var orb = sphero(elm.port);
     if (!isTestMode)
       orb.connect();
@@ -32,42 +33,42 @@ module.exports = function(config, isTestMode) {
   httpServer.listen();
 
   var wsServer = new WebSocketServer(httpServer, config.allowedOrigin);
-  var spheroConnection = wsServer.getConnection("sphero");
-  spheroConnection.on("connection", function(connection) {
-    spheroServer.addClient(spheroConnection.key, connection);
-  });
-  spheroConnection.on("message", function(data) {
-    var command = data.command;
-    var client = spheroServer.getClient(spheroConnection.key);
-    var orb = spheroServer.getClientsOrb(spheroConnection.key);
+  var spheroConnectionList = wsServer.getConnection("sphero");
+  spheroConnectionList.on("connection", function(connection, key) {
+    spheroServer.addClient(key, connection);
+    spheroConnectionList.on("message", function(data) {
+      var command = data.command;
+      var client = spheroServer.getClient(key);
+      var orb = spheroServer.getClientsOrb(key);
 
-    if (!client || !Array.isArray(data.arguments)) {
-      return;
-    }
+      if (!client || !Array.isArray(data.arguments)) {
+        return;
+      }
 
-    if (command.substr(0, 1) === "_") {
-      // internal command
-      switch (command) {
-        case "_list":
-          spheroServer.sendList(spheroConnection.key, data.ID);
-          break;
-        case "_use":
-          if (data.arguments.length === 1) {
-            spheroServer.setClientsOrb(spheroConnection.key, data.arguments[0]);
-          }
-          break;
+      if (command.substr(0, 1) === "_") {
+        // internal command
+        switch (command) {
+          case "_list":
+            spheroServer.sendList(key, data.ID);
+            break;
+          case "_use":
+            if (data.arguments.length === 1) {
+              spheroServer.setClientsOrb(key, data.arguments[0]);
+            }
+            break;
+        }
+        console.log(command + "(" + data.arguments + ")");
+      } else if (command in orb) {
+        // Sphero"s command
+        if (!isTestMode) {
+          orb[command].apply(orb, data.arguments);
+        }
+        console.log(client.linkedOrb.name + "." + command + "(" + data.arguments.join(",") + ")");
+      } else {
+        // invalid command
+        console.error("invalid command: " + command);
       }
-      console.log(command + "(" + data.arguments + ")");
-    } else if (command in orb) {
-      // Sphero"s command
-      if (!isTestMode) {
-        orb[command].apply(orb, data.arguments);
-      }
-      console.log(client.linkedOrb.name + "." + command + "(" + data.arguments.join(",") + ")");
-    } else {
-      // invalid command
-      console.error("invalid command: " + command);
-    }
+    });
   });
 
   process.on("uncaughtException", function(err) {
