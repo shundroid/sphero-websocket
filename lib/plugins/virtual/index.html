@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <title></title>
   <script type="text/javascript" src="/plugin/plugin-client.js"></script>
+  <script type="text/javascript">
+    var plugin = new PluginClient("virtual");
+    plugin.on("command", function(command, args) {
+      console.log("recieve: " + command + ", " + args);
+    });
+  </script>
 </head>
 <body>
   Hello!

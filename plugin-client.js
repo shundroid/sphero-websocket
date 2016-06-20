@@ -27,8 +27,8 @@ var PluginClient = (function() {
   })();
 
   var WebSocketClient = (function() {
-    function WebSocketClient(uri, connectionName) {
-      Dispathcer.call(this);
+    function WebSocketClient(connectionName) {
+      EventEmitter.call(this);
       this.ws = null;
       this.wsUri = null;
       this.connectionName = connectionName;
@@ -44,45 +44,53 @@ var PluginClient = (function() {
       this.wsUri = uri;
       this.ws = new WebSocket(uri);
 
-      this.ws.onopen = function() {
+      this.ws.onopen = () => {
         if (typeof successCallback === "function") {
+          this.ws.send(JSON.stringify({
+            connectionName: this.connectionName
+          }));
           successCallback(this.ws);
-          this.ws.send(this.connectionName);
         }
-      }.bind(this);
+      };
 
-      this.ws.onclose = function() {
+      this.ws.onclose = () => {
         this.ws = null;
-      }.bind(this);
+      };
 
-      this.ws.onmessage = function(message) {
+      this.ws.onmessage = (message) => {
         try {
           var data = JSON.parse(message.data);
         } catch (error) {
           console.log(error);
           return;
         }
-        this.emit("message", data);
-      }.bind(this);
+        this.emit("message", [data.content, data.ID]);
+      };
 
     };
 
     return WebSocketClient;
   })();
 
-  // pluginName は channelName と等しい
-  function PluginClient(pluginName, uri) {
+  function PluginClient(pluginName) {
     EventEmitter.call(this);
-    this.wsClient = new WebSocketClient(uri, "plugin-" + pluginName);
-    this.wsClient.on("message", (data) => {
-      if (typeof data.type === "undefined")
+    var uri = "ws://" + location.host;
+
+    this.wsClient = new WebSocketClient("plugin-" + pluginName);
+    this.wsClient.on("message", (content, mesId) => {
+      if (typeof content.type === "undefined")
         return;
 
-      if (data.type === "command") {
-        this.emit("command", [data.commandName, data.args]);
-      } else (data.type === "custom") {
-        this.emit("message", data);
+      if (content.type === "command") {
+        this.emit("command", [content.command, content.arguments]);
+      } else if (content.type === "custom") {
+        this.emit("message", [content, mesId]);
       }
+    });
+    this.wsClient.connect(uri, function() {
+      console.log("connected");
+    }, function() {
+      console.log("connecting error");
     });
   }
 

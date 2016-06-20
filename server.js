@@ -28,7 +28,7 @@ module.exports = function(config, isTestMode) {
   var httpServer = new HttpServer(config.wsPort);
   var wsServer = new WebSocketServer(httpServer, config.allowedOrigin);
 
-  var pluginManager = new PluginManager();
+  var pluginManager = new PluginManager(wsServer);
   httpServer.addDirectory(pluginManager);
 
   pluginManager.add(new VirtualPlugin());
