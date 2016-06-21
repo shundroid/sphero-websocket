@@ -11,8 +11,6 @@ var spheroServer = require("./lib/spheroServer");
 var sphero = require("sphero");
 var fs = require("fs");
 
-var VirtualPlugin = require("./lib/plugins/virtual");
-
 module.exports = function(config, isTestMode) {
   if (isTestMode) {
     console.log("running test-mode");
@@ -31,7 +29,11 @@ module.exports = function(config, isTestMode) {
   var pluginManager = new PluginManager(wsServer);
   httpServer.addDirectory(pluginManager);
 
-  pluginManager.add(new VirtualPlugin());
+  if (typeof config.plugins !== "undefined" && Array.isArray(config.plugins)) {
+    config.plugins.forEach(plugin => {
+      pluginManager.add(plugin);
+    });
+  }
 
   var client = new Client(wsServer, isTestMode, pluginManager);
   httpServer.addDirectory(client);
