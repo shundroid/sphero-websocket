@@ -90,20 +90,6 @@ module.exports = function(config, isTestMode) {
     client.on("message", function() {
       console.log("client: " + request.key);
     });
-    client.on("arriveInternalCommand", function(command, args, mesID) {
-      // internal command
-      switch (command) {
-        case "_list":
-          client.sendMessage(spheroServer.getList(), mesID);
-          break;
-        case "_use":
-          if (args.length === 1) {
-            client.setLinkedOrb(spheroServer.getOrb(args[0]));
-          }
-          break;
-      }
-      console.log(command + "(" + args + ")");
-    });
     client.on("arriveNormalCommand", function(command, args) {
       var orb = client.linkedOrb;
       if (orb !== null) {
@@ -118,6 +104,16 @@ module.exports = function(config, isTestMode) {
           // invalid command
           console.error("invalid command: " + command);
         }
+      }
+    });
+    client.on("arriveCustomMessage", function(name, data, mesId) {
+      switch (name) {
+        case "getList":
+          client.sendCustomMessage("list", spheroServer.getList(), mesId);
+          break;
+        case "use":
+          client.setLinkedOrb(spheroServer.getOrb(data));
+          break;
       }
     });
     connection.on("close", function(reasonCode, description) {

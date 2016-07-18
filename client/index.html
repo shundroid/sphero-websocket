@@ -29,19 +29,20 @@
 
         var select = document.getElementById("list");
         document.getElementById("getList").addEventListener("click", function() {
-          orb.getList(function(list) {
-            select.innerHTML = "";
-            list.forEach(function(name) {
-              var elm = document.createElement("option"); 
-              elm.textContent = name;
-              elm.value = name;
-              select.appendChild(elm);
-            });
+          orb.sendCustomMessage("getList", {});
+        });
+        orb.listenCustomMessage("list", function(list) {
+          select.innerHTML = "";
+          list.forEach(function(name) {
+            var elm = document.createElement("option");
+            elm.textContent = name;
+            elm.value = name;
+            select.appendChild(elm);
           });
         });
         select.addEventListener("change", function(e) {
           var name = select.options[select.selectedIndex].value;
-          orb.use(name);
+          orb.sendCustomMessage("use", name);
         });
 
         document.getElementById("forward").addEventListener("click", function() {
