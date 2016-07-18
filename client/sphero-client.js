@@ -6,6 +6,7 @@ var sphero = function() {
   this.ws = null;
   this.wsUri = null;
   this._resQueue = {};
+  this.customMessageListeners = {};
 };
 
 sphero.prototype.connect = function(uri, successCallback, errorCallback) {
@@ -51,8 +52,6 @@ sphero.prototype.connect = function(uri, successCallback, errorCallback) {
       }
     }
   }.bind(this);
-
-  this.customMessageListeners = {};
 };
 
 sphero.prototype.disconnect = function() {
@@ -75,14 +74,6 @@ sphero.prototype.send = function(cmd, args, resCallback) {
     ID: mesID
   };
   this.ws.send(JSON.stringify(data));
-};
-
-sphero.prototype.getList = function(callback) {
-  this.send("_list", [], callback);
-};
-
-sphero.prototype.use = function(name, callback) {
-  this.send("_use", [name], callback);
 };
 
 // sphero-websocket server側の外側とのメッセージ交換用
