@@ -106,16 +106,6 @@ module.exports = function(config, isTestMode) {
         }
       }
     });
-    client.on("arriveCustomMessage", function(name, data, mesId) {
-      switch (name) {
-        case "getList":
-          client.sendCustomMessage("list", spheroServer.getList(), mesId);
-          break;
-        case "use":
-          client.setLinkedOrb(spheroServer.getOrb(data));
-          break;
-      }
-    });
     connection.on("close", function(reasonCode, description) {
       spheroServer.removeClient(request.key);
       console.log((new Date()) + " Peer " + connection.remoteAddress + " disconnected.");
